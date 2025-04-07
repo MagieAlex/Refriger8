@@ -4,100 +4,42 @@
 <head>
     <meta charset="UTF-8">
     <title>Fridge Inventory</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f9f9f9;
-            padding: 2rem;
-            color: #333;
-        }
-
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-        }
-
-        form {
-            background: #ffffff;
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            max-width: 600px;
-            margin: 0 auto 2rem;
-        }
-
-        form input, form select {
-            width: 100%;
-            padding: 0.6rem;
-            margin-bottom: 1rem;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-        }
-
-        form button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 0.8rem 1.2rem;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        form button:hover {
-            background-color: #2980b9;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #ffffff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        th, td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-
-        .spoiled {
-            background-color: #ffe5e5;  /* soft red */
-        }
-
-        .about_to_spoil {
-            background-color: #fff8dc;  /* soft yellow */
-        }
-
-        .fresh {
-            background-color: #e6ffed;  /* soft green */
-        }
-    </style>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'fridge/style.css' %}">
 </head>
 <body>
 
     <h1>🧊 Fridge Inventory</h1>
 
+    <!-- Filter Form -->
+    <form method="get" class="filter-form">
+        <label for="category">Filter by Category:</label>
+        <select name="category" onchange="this.form.submit()">
+            <option value="">All</option>
+            {% for code, label in categories %}
+                <option value="{{ code }}" {% if selected_category == code %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </form>
+
+    <!-- Add Item Form -->
     <form method="POST">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Add Food Item</button>
     </form>
 
+    <!-- Items Table -->
     <table>
         <thead>
             <tr>
-                <th>Food</th>
-                <th>Category</th>
-                <th>Quantity</th>
-                <th>Best By</th>
+                <th><a href="?sort=name{% if selected_category %}&category={{ selected_category }}{% endif %}">Food</a></th>
+                <th><a href="?sort=category{% if selected_category %}&category={{ selected_category }}{% endif %}">Category</a></th>
+                <th><a href="?sort=quantity{% if selected_category %}&category={{ selected_category }}{% endif %}">Qty</a></th>
+                <th><a href="?sort=best_by{% if selected_category %}&category={{ selected_category }}{% endif %}">Best By</a></th>
                 <th>Status</th>
+                <th><a href="?sort=storage_location{% if selected_category %}&category={{ selected_category }}{% endif %}">Location</a></th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -107,11 +49,16 @@
                     <td>{{ item.get_category_display }}</td>
                     <td>{{ item.quantity }}</td>
                     <td>{{ item.best_by }}</td>
-                    <td>{{ item.status|capfirst }}</td>
+                    <td>{{ item.status|capfirst }} <small>({{ item.days_left }})</small></td>
+                    <td>{{ item.get_storage_location_display }}</td>
+                    <td class="actions">
+                        <a href="{% url 'edit_item' item.pk %}">✏️</a>
+                        <a href="{% url 'delete_item' item.pk %}" onclick="return confirm('Are you sure?')">🗑️</a>
+                    </td>
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="5" style="text-align: center; padding: 2rem;">No food items yet!</td>
+                    <td colspan="6" style="text-align: center; padding: 2rem;">No food items yet!</td>
                 </tr>
             {% endfor %}
         </tbody>

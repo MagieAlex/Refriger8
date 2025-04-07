@@ -1,0 +1,25 @@
+<!-- fridge/templates/fridge/edit.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Food Item</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'fridge/style.css' %}">
+</head>
+<body>
+
+    <h1>Edit: {{ item.name }}</h1>
+
+    <div class="form-container">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Save Changes</button>
+        </form>
+    </div>
+
+    <a class="back-link" href="{% url 'fridge' %}">← Back to Fridge</a>
+
+</body>
+</html>
