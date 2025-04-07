@@ -1,0 +1,121 @@
+<!-- fridge/templates/fridge/fridge.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fridge Inventory</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f9f9f9;
+            padding: 2rem;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        form {
+            background: #ffffff;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        form input, form select {
+            width: 100%;
+            padding: 0.6rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        form button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        form button:hover {
+            background-color: #2980b9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .spoiled {
+            background-color: #ffe5e5;  /* soft red */
+        }
+
+        .about_to_spoil {
+            background-color: #fff8dc;  /* soft yellow */
+        }
+
+        .fresh {
+            background-color: #e6ffed;  /* soft green */
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🧊 Fridge Inventory</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Add Food Item</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Food</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Best By</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+                <tr class="{{ item.status }}">
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.get_category_display }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.best_by }}</td>
+                    <td>{{ item.status|capfirst }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 2rem;">No food items yet!</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>
