@@ -1,68 +1,75 @@
-<!-- fridge/templates/fridge/fridge.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Fridge Inventory</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'fridge/style.css' %}">
-</head>
-<body>
+{% extends "fridge/base.html" %}
+{% load static %}
 
-    <h1>🧊 Fridge Inventory</h1>
+{% block title %}Fridge Inventory{% endblock %}
 
-    <!-- Filter Form -->
-    <form method="get" class="filter-form">
-        <label for="category">Filter by Category:</label>
-        <select name="category" onchange="this.form.submit()">
-            <option value="">All</option>
-            {% for code, label in categories %}
-                <option value="{{ code }}" {% if selected_category == code %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-        </select>
-    </form>
+{% block content %}
 
-    <!-- Add Item Form -->
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Add Food Item</button>
-    </form>
+<div class="navbar">
+    {% for code, label in storage_locations %}
+        <a href="?storage={{ code }}{% if selected_category %}&category={{ selected_category }}{% endif %}"
+           class="{% if selected_storage == code %}active{% endif %}">
+            {{ label }}
+        </a>
+    {% endfor %}
+    <a href="/" class="{% if not selected_storage %}active{% endif %}">All</a>
+</div>
 
-    <!-- Items Table -->
-    <table>
-        <thead>
-            <tr>
-                <th><a href="?sort=name{% if selected_category %}&category={{ selected_category }}{% endif %}">Food</a></th>
-                <th><a href="?sort=category{% if selected_category %}&category={{ selected_category }}{% endif %}">Category</a></th>
-                <th><a href="?sort=quantity{% if selected_category %}&category={{ selected_category }}{% endif %}">Qty</a></th>
-                <th><a href="?sort=best_by{% if selected_category %}&category={{ selected_category }}{% endif %}">Best By</a></th>
-                <th>Status</th>
-                <th><a href="?sort=storage_location{% if selected_category %}&category={{ selected_category }}{% endif %}">Location</a></th>
-                <th>Actions</th>
+<h1>🧊 Ultimate Food Database</h1>
+
+<!-- Filter Form -->
+<form method="get" class="filter-form">
+    <label for="category">Filter by Category:</label>
+    <select name="category" onchange="this.form.submit()">
+        <option value="">All</option>
+        {% for code, label in categories %}
+            <option value="{{ code }}" {% if selected_category == code %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+</form>
+
+<!-- Add Item Form -->
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Add Food Item</button>
+</form>
+
+<!-- Items Table -->
+<table>
+    <thead>
+        <tr>
+            <th><a href="?sort=name{% if selected_category %}&category={{ selected_category }}{% endif %}">Food</a></th>
+            <th><a href="?sort=category{% if selected_category %}&category={{ selected_category }}{% endif %}">Category</a></th>
+            <th><a href="?sort=quantity{% if selected_category %}&category={{ selected_category }}{% endif %}">Qty</a></th>
+            <th><a href="?sort=best_by{% if selected_category %}&category={{ selected_category }}{% endif %}">Best By</a></th>
+            <th>Status</th>
+            <th><a href="?sort=opened{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_storage %}&storage={{ selected_storage }}{% endif %}">Opened</a></th>
+            <th><a href="?sort=storage_location{% if selected_category %}&category={{ selected_category }}{% endif %}">Location</a></th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+            <tr class="{{ item.status }}">
+                <td>{{ item.name }}</td>
+                <td>{{ item.get_category_display }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.best_by }}</td>
+                <td>{{ item.status|capfirst }} <small>({{ item.days_left }})</small></td>
+                <td>{% if item.opened %}✔️{% else %}—{% endif %}</td>
+                <td>{{ item.get_storage_location_display }}</td>
+                <td class="actions">
+                    <a href="{% url 'edit_item' item.pk %}">✏️</a>
+                    <a href="{% url 'delete_item' item.pk %}" onclick="return confirm('Are you sure?')">🗑️</a>
+                </td>
             </tr>
-        </thead>
-        <tbody>
-            {% for item in items %}
-                <tr class="{{ item.status }}">
-                    <td>{{ item.name }}</td>
-                    <td>{{ item.get_category_display }}</td>
-                    <td>{{ item.quantity }}</td>
-                    <td>{{ item.best_by }}</td>
-                    <td>{{ item.status|capfirst }} <small>({{ item.days_left }})</small></td>
-                    <td>{{ item.get_storage_location_display }}</td>
-                    <td class="actions">
-                        <a href="{% url 'edit_item' item.pk %}">✏️</a>
-                        <a href="{% url 'delete_item' item.pk %}" onclick="return confirm('Are you sure?')">🗑️</a>
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="6" style="text-align: center; padding: 2rem;">No food items yet!</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 2rem;">No food items yet!</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
-</body>
-</html>
+{% endblock %}

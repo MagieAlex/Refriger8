@@ -37,19 +37,25 @@ class FoodItem(models.Model):
     quantity = models.IntegerField(default=1)
     best_by = models.DateField(null=True, blank=True)
     storage_location = models.CharField(max_length=50, choices=STORAGE_CHOICES, default='fridge')
-
+    opened = models.BooleanField(default=False)
 
     @property
     def status(self):
+        if self.best_by is None:
+            return "unknown"
+
         today = date.today()
         if self.best_by < today:
             return "spoiled"
         elif self.best_by <= today + timedelta(days=2):
             return "about_to_spoil"
-        return "fresh"
+        else:
+            return "fresh"
 
     @property
     def days_left(self):
+        if self.best_by is None:
+            return "?"
         delta = (self.best_by - date.today()).days
         if delta > 0:
             return f"in {delta} day{'s' if delta > 1 else ''}"

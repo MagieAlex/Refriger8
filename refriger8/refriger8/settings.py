@@ -26,7 +26,9 @@ SECRET_KEY = 'django-insecure-plxe&^jc&tthd)2x#^*59(y1r8eli%1h8))hqm&^oh1_brr*@1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+import socket
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', socket.gethostbyname(socket.gethostname())]
+
 
 
 # Application definition

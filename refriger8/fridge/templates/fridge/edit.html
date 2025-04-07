@@ -1,14 +1,9 @@
-<!-- fridge/templates/fridge/edit.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Edit Food Item</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'fridge/style.css' %}">
-</head>
-<body>
+{% extends "fridge/base.html" %}
+{% load static %}
 
+{% block title %}Edit Food Item{% endblock %}
+
+{% block content %}
     <h1>Edit: {{ item.name }}</h1>
 
     <div class="form-container">
@@ -20,6 +15,4 @@
     </div>
 
     <a class="back-link" href="{% url 'fridge' %}">← Back to Fridge</a>
-
-</body>
-</html>
+{% endblock %}

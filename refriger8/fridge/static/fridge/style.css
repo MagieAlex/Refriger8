@@ -124,3 +124,51 @@ tr:hover {
 .back-link:hover {
     text-decoration: underline;
 }
+
+.navbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.navbar a {
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    background-color: #3a3a3a;
+    color: #f0f0f0;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
+
+.navbar a:hover {
+    background-color: #555;
+}
+
+.navbar a.active {
+    background-color: #3498db;
+    color: white;
+}
+
+.unknown {
+    background-color: #3a3a3a;  /* neutral dark gray */
+    color: #f0f0f0;  /* light text for contrast */
+}
+
+.export-btn {
+    background-color: #27ae60;
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background 0.2s ease;
+}
+
+.export-btn:hover {
+    background-color: #1e8449;
+}
+
+
