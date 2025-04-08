@@ -1,0 +1,18 @@
+{% extends "fridge/base.html" %}
+{% load static %}
+
+{% block title %}Edit Food Item{% endblock %}
+
+{% block content %}
+    <h1>Edit: {{ item.name }}</h1>
+
+    <div class="form-container">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Save Changes</button>
+        </form>
+    </div>
+
+    <a class="back-link" href="{% url 'fridge' %}">← Back to Fridge</a>
+{% endblock %}

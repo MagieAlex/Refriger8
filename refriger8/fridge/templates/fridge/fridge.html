@@ -1,121 +1,83 @@
-<!-- fridge/templates/fridge/fridge.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Fridge Inventory</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f9f9f9;
-            padding: 2rem;
-            color: #333;
-        }
+{% extends "fridge/base.html" %}
+{% load static %}
 
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-        }
+{% block title %}Fridge Inventory{% endblock %}
 
-        form {
-            background: #ffffff;
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            max-width: 600px;
-            margin: 0 auto 2rem;
-        }
+{% block content %}
 
-        form input, form select {
-            width: 100%;
-            padding: 0.6rem;
-            margin-bottom: 1rem;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-        }
+<div class="navbar">
+    {% for code, label in storage_locations %}
+        <a href="?storage={{ code }}{% if selected_category %}&category={{ selected_category }}{% endif %}"
+           class="{% if selected_storage == code %}active{% endif %}">
+            {% if code == 'fridge' %}{% elif code == 'freezer' %}
+            {% elif code == 'upper_pantry' %}
+            {% elif code == 'lower_pantry' %}
+            {% elif code == 'counter' %}
+            {% elif code == 'candy_cabinet' %}
+            {% elif code == 'hanging_table' %}
+            {% elif code == 'bar' %}
+            {% endif %} {{ label }}
+        </a>
+    {% endfor %}
+    <a href="/" class="{% if not selected_storage %}active{% endif %}">📦 All</a>
+</div>
 
-        form button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 0.8rem 1.2rem;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-        }
+<h1>✨ Ultimate Food Database ✨</h1>
 
-        form button:hover {
-            background-color: #2980b9;
-        }
+<!-- Filter Form -->
+<form method="get" class="filter-form">
+    <label for="category">Filter by Category:</label>
+    <select name="category" onchange="this.form.submit()">
+        <option value="">All</option>
+        {% for code, label in categories %}
+            <option value="{{ code }}" {% if selected_category == code %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+</form>
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #ffffff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            border-radius: 10px;
-            overflow: hidden;
-        }
+<!-- Add Item Form -->
+<form method="POST" action="?{% if selected_category %}category={{ selected_category }}{% endif %}{% if selected_storage %}&storage={{ selected_storage }}{% endif %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Add Food Item</button>
+</form>
 
-        th, td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
 
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-
-        .spoiled {
-            background-color: #ffe5e5;  /* soft red */
-        }
-
-        .about_to_spoil {
-            background-color: #fff8dc;  /* soft yellow */
-        }
-
-        .fresh {
-            background-color: #e6ffed;  /* soft green */
-        }
-    </style>
-</head>
-<body>
-
-    <h1>🧊 Fridge Inventory</h1>
-
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Add Food Item</button>
-    </form>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Food</th>
-                <th>Category</th>
-                <th>Quantity</th>
-                <th>Best By</th>
-                <th>Status</th>
+<!-- Items Table -->
+<table>
+    <thead>
+        <tr>
+            <th><a href="?sort=name{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_storage %}&storage={{ selected_storage }}{% endif %}">Food</a></th>
+            <th><a href="?sort=category{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_storage %}&storage={{ selected_storage }}{% endif %}">Category</a></th>
+            <th><a href="?sort=quantity{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_storage %}&storage={{ selected_storage }}{% endif %}">Qty</a></th>
+            <th><a href="?sort=best_by{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_storage %}&storage={{ selected_storage }}{% endif %}">Best By</a></th>
+            <th>Status</th>
+            <th><a href="?sort=opened{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_storage %}&storage={{ selected_storage }}{% endif %}">Opened</a></th>
+            <th><a href="?sort=storage_location{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_storage %}&storage={{ selected_storage }}{% endif %}">Location</a></th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+            <tr class="{% if item.opened %}opened-{{ item.status }}{% else %}{{ item.status }}{% endif %}">
+                <td>{{ item.name }}</td>
+                <td>{{ item.get_category_display }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.best_by }}</td>
+                <td>{{ item.status|capfirst }} <small>({{ item.days_left }})</small></td>
+                <td>{% if item.opened %}🍽️{% else %}—{% endif %}</td>
+                <td>{{ item.get_storage_location_display }}</td>
+                <td class="actions">
+                    <a href="{% url 'edit_item' item.pk %}?category={{ selected_category }}&storage={{ selected_storage }}">✏️</a>
+                    <a href="{% url 'delete_item' item.pk %}?category={{ selected_category }}&storage={{ selected_storage }}&sort={{ sort }}" onclick="return confirm('Are you sure?')">🗑️</a>
+                </td>
             </tr>
-        </thead>
-        <tbody>
-            {% for item in items %}
-                <tr class="{{ item.status }}">
-                    <td>{{ item.name }}</td>
-                    <td>{{ item.get_category_display }}</td>
-                    <td>{{ item.quantity }}</td>
-                    <td>{{ item.best_by }}</td>
-                    <td>{{ item.status|capfirst }}</td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="5" style="text-align: center; padding: 2rem;">No food items yet!</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 2rem;">No food items yet!</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
-</body>
-</html>
+{% endblock %}

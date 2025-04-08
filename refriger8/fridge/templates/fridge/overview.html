@@ -1,0 +1,42 @@
+{% extends "fridge/base.html" %}
+{% load static %}
+
+{% block title %}Overview – Spoiling Food{% endblock %}
+
+{% block content %}
+
+<h1>📋 Overview – Spoiling Items</h1>
+
+{% if overview %}
+    {% for location, items in overview.items %}
+        <h2>{{ location }}</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Food</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Best By</th>
+                    <th>Status</th>
+                    <th>Opened</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr class="{{ item.status }}">
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.get_category_display }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.best_by }}</td>
+                        <td>{{ item.status|capfirst }} <small>({{ item.days_left }})</small></td>
+                        <td>{% if item.opened %}🍽️{% else %}—{% endif %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %}
+{% else %}
+    <p style="text-align: center; margin-top: 2rem;">🎉 No food is about to spoil!</p>
+{% endif %}
+
+{% endblock %}

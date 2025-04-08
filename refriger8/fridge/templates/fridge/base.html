@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Refrigerator App{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'fridge/style.css' %}">
+</head>
+<body>
+
+    <!-- Shared Navbar -->
+    <div class="navbar">
+        <a href="{% url 'fridge' %}" class="{% if request.path == '/' %}active{% endif %}">🏠 Home</a>
+        <a href="{% url 'overview' %}" class="{% if request.path|slice:'0:9' == '/overview' %}active{% endif %}">📋 Overview</a>
+        <a href="{% url 'export_items' %}">📄 Export</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        {% block content %}
+        <!-- Content from child templates goes here -->
+        {% endblock %}
+    </div>
+
+</body>
+</html>
