@@ -10,7 +10,7 @@
 
     <!-- Shared Navbar -->
     <div class="navbar">
-        <a href="{% url 'fridge' %}" class="{% if request.path == '/' %}active{% endif %}">🏠 Fridge</a>
+        <a href="{% url 'fridge' %}" class="{% if request.path == '/' %}active{% endif %}">🏠 Home</a>
         <a href="{% url 'overview' %}" class="{% if request.path|slice:'0:9' == '/overview' %}active{% endif %}">📋 Overview</a>
         <a href="{% url 'export_items' %}">📄 Export</a>
     </div>

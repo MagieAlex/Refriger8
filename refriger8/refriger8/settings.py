@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-plxe&^jc&tthd)2x#^*59(y1r8eli%1h8))hqm&^oh1_brr*@1
 DEBUG = True
 
 import socket
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', socket.gethostbyname(socket.gethostname())]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', socket.gethostbyname(socket.gethostname()), '192.168.2.110']
 
 
 

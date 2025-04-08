@@ -9,13 +9,20 @@
     {% for code, label in storage_locations %}
         <a href="?storage={{ code }}{% if selected_category %}&category={{ selected_category }}{% endif %}"
            class="{% if selected_storage == code %}active{% endif %}">
-            {{ label }}
+            {% if code == 'fridge' %}{% elif code == 'freezer' %}
+            {% elif code == 'upper_pantry' %}
+            {% elif code == 'lower_pantry' %}
+            {% elif code == 'counter' %}
+            {% elif code == 'candy_cabinet' %}
+            {% elif code == 'hanging_table' %}
+            {% elif code == 'bar' %}
+            {% endif %} {{ label }}
         </a>
     {% endfor %}
-    <a href="/" class="{% if not selected_storage %}active{% endif %}">All</a>
+    <a href="/" class="{% if not selected_storage %}active{% endif %}">📦 All</a>
 </div>
 
-<h1>🧊 Ultimate Food Database</h1>
+<h1>✨ Ultimate Food Database ✨</h1>
 
 <!-- Filter Form -->
 <form method="get" class="filter-form">
@@ -29,39 +36,40 @@
 </form>
 
 <!-- Add Item Form -->
-<form method="POST">
+<form method="POST" action="?{% if selected_category %}category={{ selected_category }}{% endif %}{% if selected_storage %}&storage={{ selected_storage }}{% endif %}">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Add Food Item</button>
 </form>
 
+
 <!-- Items Table -->
 <table>
     <thead>
         <tr>
-            <th><a href="?sort=name{% if selected_category %}&category={{ selected_category }}{% endif %}">Food</a></th>
-            <th><a href="?sort=category{% if selected_category %}&category={{ selected_category }}{% endif %}">Category</a></th>
-            <th><a href="?sort=quantity{% if selected_category %}&category={{ selected_category }}{% endif %}">Qty</a></th>
-            <th><a href="?sort=best_by{% if selected_category %}&category={{ selected_category }}{% endif %}">Best By</a></th>
+            <th><a href="?sort=name{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_storage %}&storage={{ selected_storage }}{% endif %}">Food</a></th>
+            <th><a href="?sort=category{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_storage %}&storage={{ selected_storage }}{% endif %}">Category</a></th>
+            <th><a href="?sort=quantity{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_storage %}&storage={{ selected_storage }}{% endif %}">Qty</a></th>
+            <th><a href="?sort=best_by{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_storage %}&storage={{ selected_storage }}{% endif %}">Best By</a></th>
             <th>Status</th>
             <th><a href="?sort=opened{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_storage %}&storage={{ selected_storage }}{% endif %}">Opened</a></th>
-            <th><a href="?sort=storage_location{% if selected_category %}&category={{ selected_category }}{% endif %}">Location</a></th>
+            <th><a href="?sort=storage_location{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_storage %}&storage={{ selected_storage }}{% endif %}">Location</a></th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         {% for item in items %}
-            <tr class="{{ item.status }}">
+            <tr class="{% if item.opened %}opened-{{ item.status }}{% else %}{{ item.status }}{% endif %}">
                 <td>{{ item.name }}</td>
                 <td>{{ item.get_category_display }}</td>
                 <td>{{ item.quantity }}</td>
                 <td>{{ item.best_by }}</td>
                 <td>{{ item.status|capfirst }} <small>({{ item.days_left }})</small></td>
-                <td>{% if item.opened %}✔️{% else %}—{% endif %}</td>
+                <td>{% if item.opened %}🍽️{% else %}—{% endif %}</td>
                 <td>{{ item.get_storage_location_display }}</td>
                 <td class="actions">
-                    <a href="{% url 'edit_item' item.pk %}">✏️</a>
-                    <a href="{% url 'delete_item' item.pk %}" onclick="return confirm('Are you sure?')">🗑️</a>
+                    <a href="{% url 'edit_item' item.pk %}?category={{ selected_category }}&storage={{ selected_storage }}">✏️</a>
+                    <a href="{% url 'delete_item' item.pk %}?category={{ selected_category }}&storage={{ selected_storage }}&sort={{ sort }}" onclick="return confirm('Are you sure?')">🗑️</a>
                 </td>
             </tr>
         {% empty %}

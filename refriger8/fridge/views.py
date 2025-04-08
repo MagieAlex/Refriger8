@@ -2,42 +2,61 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import FoodItem
 from .forms import FoodItemForm
+from django.urls import reverse
+
+# views.py
 
 def fridge_view(request):
+    items = FoodItem.objects.all()
+
+    # GET parameters
     sort = request.GET.get('sort')
     selected_category = request.GET.get('category', '')
     selected_storage = request.GET.get('storage', '')
 
-    items = FoodItem.objects.all()
-
+    # Filter by category/storage
     if selected_category:
         items = items.filter(category=selected_category)
-
     if selected_storage:
         items = items.filter(storage_location=selected_storage)
 
-    if sort:
+    # Sorting
+    if sort and sort != 'None':
         items = items.order_by(sort)
     else:
         items = items.order_by('storage_location', 'best_by')
 
-    form = FoodItemForm(request.POST or None)
+    # Initialize the form with default storage
+    initial_data = {'storage_location': selected_storage} if selected_storage else {}
+    form = FoodItemForm(request.POST or None, initial=initial_data)
+
     if form.is_valid():
         form.save()
-        return redirect('fridge')
+        # Preserve filters after adding
+        redirect_url = reverse('fridge')
+        params = []
+        if selected_category:
+            params.append(f"category={selected_category}")
+        if selected_storage:
+            params.append(f"storage={selected_storage}")
+        if sort and sort != 'None':
+            params.append(f"sort={sort}")
+        if params:
+            redirect_url += '?' + '&'.join(params)
+        return redirect(redirect_url)
 
-    categories = FoodItem.CATEGORY_CHOICES
-    storage_locations = FoodItem.STORAGE_CHOICES
-
-    return render(request, 'fridge/fridge.html', {
+    context = {
         'items': items,
         'form': form,
-        'categories': categories,
+        'categories': FoodItem.CATEGORY_CHOICES,
+        'storage_locations': FoodItem.STORAGE_CHOICES,
         'selected_category': selected_category,
         'selected_storage': selected_storage,
         'sort': sort,
-        'storage_locations': storage_locations,
-    })
+    }
+
+    return render(request, 'fridge/fridge.html', context)
+
 
 
 from django.shortcuts import get_object_or_404
@@ -45,18 +64,47 @@ from django.shortcuts import get_object_or_404
 def delete_item(request, pk):
     item = get_object_or_404(FoodItem, pk=pk)
     item.delete()
-    return redirect('fridge')
+
+    # Preserve filters and sorting
+    selected_category = request.GET.get('category', '')
+    selected_storage = request.GET.get('storage', '')
+    sort = request.GET.get('sort', '')
+
+    redirect_url = reverse('fridge')
+    params = []
+    if selected_category:
+        params.append(f"category={selected_category}")
+    if selected_storage:
+        params.append(f"storage={selected_storage}")
+    if sort:
+        params.append(f"sort={sort}")
+    if params:
+        redirect_url += '?' + '&'.join(params)
+
+    return redirect(redirect_url)
 
 def edit_item(request, pk):
     item = get_object_or_404(FoodItem, pk=pk)
+
+    category = request.GET.get('category', '')
+    storage = request.GET.get('storage', '')
+
     if request.method == 'POST':
         form = FoodItemForm(request.POST, instance=item)
         if form.is_valid():
             form.save()
-            return redirect('fridge')
+            # Redirect back to fridge with filters
+            return redirect(f'/?' + f'category={category}&storage={storage}')
     else:
         form = FoodItemForm(instance=item)
-    return render(request, 'fridge/edit.html', {'form': form, 'item': item})
+
+    return render(request, 'fridge/edit.html', {
+        'form': form,
+        'item': item,
+        'category': category,
+        'storage': storage
+    })
+
 
 import csv
 from django.http import HttpResponse
@@ -95,6 +143,10 @@ def overview_view(request):
         status = item.status
         if status in ('spoiled', 'about_to_spoil'):
             overview[item.get_storage_location_display()].append(item)
+
+    # Sort each list by best_by date (None dates last)
+    for storage in overview:
+        overview[storage].sort(key=lambda x: (x.best_by is None, x.best_by))
 
     return render(request, 'fridge/overview.html', {
         'overview': dict(overview)

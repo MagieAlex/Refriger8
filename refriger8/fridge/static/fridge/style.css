@@ -88,6 +88,20 @@ tr:hover {
     background-color: #23432a;  /* muted green */
 }
 
+/* Opened versions — slightly lighter/muted */
+.opened-spoiled {
+    background-color: #6a2e2e;  /* slightly lighter red */
+}
+
+.opened-about_to_spoil {
+    background-color: #74612d;  /* brighter yellow-brown */
+}
+
+.opened-fresh {
+    background-color: #2f5e3b;  /* brighter green */
+}
+
+
 .actions a {
     margin-right: 0.5rem;
     text-decoration: none;

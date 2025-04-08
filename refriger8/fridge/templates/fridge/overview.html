@@ -28,8 +28,8 @@
                         <td>{{ item.get_category_display }}</td>
                         <td>{{ item.quantity }}</td>
                         <td>{{ item.best_by }}</td>
-                        <td>{{ item.status|capfirst }}</td>
-                        <td>{% if item.opened %}✔️{% else %}—{% endif %}</td>
+                        <td>{{ item.status|capfirst }} <small>({{ item.days_left }})</small></td>
+                        <td>{% if item.opened %}🍽️{% else %}—{% endif %}</td>
                     </tr>
                 {% endfor %}
             </tbody>
